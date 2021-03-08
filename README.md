@@ -4,7 +4,7 @@
 
 ### 1. Setting up the Anaconda environment with COMPAS
 
-Execute the commands below in Anaconda Prompt:
+#### Execute the commands below in Anaconda Prompt:
 	
     (base) conda config --add channels conda-forge
     (base) conda create -n wiw compas_fab --yes
