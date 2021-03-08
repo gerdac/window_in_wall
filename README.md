@@ -2,28 +2,29 @@
 
 
 
-## 1. Setting up the Anaconda environment with COMPAS
+### 1. Setting up the Anaconda environment with COMPAS
 
-### Execute the commands below in Anaconda Prompt:
+Execute the commands below in Anaconda Prompt:
 	
     (base) conda config --add channels conda-forge
     (base) conda create -n wiw compas_fab --yes
     (base) conda activate wiw
     
-### Verify Installation
+#### Verify Installation
     (wiw) pip show compas_fab
-    
+
+####
     Name: compas-fab
     Version: 0.xx
     Summary: Robotic fabrication package for the COMPAS Framework
     ...
 
-### Install on Rhino
+#### Install on Rhino
 
     (wiw) python -m compas_rhino.install -v 7.0
 
 
-## 2. Installation of Dependencies
+### 2. Installation of Dependencies
 
     (wiw) conda install git
 
