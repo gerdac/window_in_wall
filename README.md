@@ -1,4 +1,4 @@
-# window_in_wall
+# Window in Wall
 
 
 
@@ -44,8 +44,7 @@ Create a workspace directory:
 
 C:\Users\YOUR_USERNAME\workspace
 
-Then open Github Desktop and clone the following repositories into you workspace folder:
+Then open Github Desktop and clone the [window_in_wall](https://github.com/augmentedfabricationlab/window_in_wall) repository into you workspace folder:
 
-* [afab_course](https://github.com/augmentedfabricationlab/window_in_wall)
 
 ### Credits
