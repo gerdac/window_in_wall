@@ -193,14 +193,14 @@ def setKmat():
          dispX[i][j]=solX[globOf(i,j)]
          dispY[i][j]=solY[globOf(i,j)]
 
-   #pyplot.imshow(dispY)
-   #pyplot.imshow(Kx)
-   #pyplot.imshow(Kx)
-   #print(rhsX)
-   #pyplot.imshow(Kx)
-   #pyplot.imshow(np.linalg.inv(Kx))
-   #pyplot.colorbar()
-   #pyplot.show()
+   # pyplot.imshow(dispY)
+   # pyplot.imshow(Kx)
+   # pyplot.imshow(Kx)
+   # print(rhsX)
+   # pyplot.imshow(Kx)
+   # pyplot.imshow(np.linalg.inv(Kx))
+   # pyplot.colorbar()
+   # pyplot.show()
    
 
 ############################################# GENERAL MATH FUNCTIONS #########################################
