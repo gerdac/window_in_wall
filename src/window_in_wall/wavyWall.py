@@ -185,6 +185,7 @@ def setKmat():
    for p in (gatePoints):
       applyXdir(p[0],p[1],p[2])
       applyYdir(p[0],p[1],p[3])
+   
    solX=np.linalg.solve(Kx,rhsX)
    solY=np.linalg.solve(Ky,rhsY)
 
