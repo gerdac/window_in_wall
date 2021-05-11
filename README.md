@@ -45,13 +45,15 @@
 * Open Github Desktop, clone the [window_in_wall](https://github.com/augmentedfabricationlab/window_in_wall) repository into you workspace folder 
 * Install within your wiw env (in editable mode):
 
+    
     (wiw) pip install -e your_filepath_to_window_in_wall
+
 
 * Change to repository directory in the Anaconda prompt and make the project accessible for Rhino:
 
+    
     (wiw) pip install -r requirements-dev.txt  
     (wiw) invoke add-to-rhino
-    
 
 
 ### Credits
