@@ -55,5 +55,8 @@
     (wiw) pip install -r requirements-dev.txt  
     (wiw) invoke add-to-rhino
 
+### 4. Notes on RPC:
+
+Careful: RPC (Remote Procedure Call) for calling numpy functions from within Rhino, is using the CPython Interpreter of the latest installed environment, not defined specifically. If another interpreter should be used, this can be defined when creating the Proxy object.
 
 ### Credits
