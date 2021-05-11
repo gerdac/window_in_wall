@@ -3,7 +3,6 @@ import compas
 
 from compas.datastructures import Mesh
 
-
 class Wall(object):
     """ Wall generator
 
@@ -32,7 +31,7 @@ class Wall(object):
                 x = i * self.elsize
                 y = 0
                 z = j * self.elsize
-                self.mesh.add_vertex(x = x, y = 0, z = z)
+                self.mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j)
 
         # create faces
         for i in range(self.x_size - 1):
@@ -67,7 +66,7 @@ class Wall(object):
             x_val = self.mesh.vertex_attribute(vertex, name='x')
             z_val = self.mesh.vertex_attribute(vertex, name='z')
 
-            # calcluate distance
+            # calculate distance
             xx = gate_x-x_val
             zz = z_val
 
@@ -75,7 +74,10 @@ class Wall(object):
             dist = math.sqrt((x_val-gate_x)*(x_val-gate_x)+z_val*z_val)
             if abs(dist-gate_radius)<self.elsize:
                 # store new vertex attribute with the distance to the gate center
-                self.mesh.vertex_attribute(vertex, name='gate_point', value=[-xx,zz])
+                self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
+                i = self.mesh.vertex_attribute(vertex, "i")
+                j = self.mesh.vertex_attribute(vertex, "j")
+                self.gate_points.append([i,j,-xx,zz])
     
     def gate_persian(self, gate_radius=1.0, gate_x=1.75):
         """calculate the gate points of a persian gate
@@ -94,7 +96,7 @@ class Wall(object):
             zz = z_val
 
             # calculate regions
-            region1 = zz < gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0) #magic numbers?
+            region1 = zz < gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0)
             equation1 = abs(xx)-gate_radius < self.elsize
 
             region2 = zz > gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0) and zz < gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2))
@@ -105,9 +107,12 @@ class Wall(object):
 
             if (region1 and equation1) or (region2 and equation2) or (region3 and equation3):
                 # store new vertex attribute with the distance to the gate center
-                self.mesh.vertex_attribute(vertex, name='gate_point', value=[-xx,zz])
-    
-    def numpy_test_function(self):
+                self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
+                i = self.mesh.vertex_attribute(vertex, "i")
+                j = self.mesh.vertex_attribute(vertex, "j")
+                self.gate_points.append([i,j,-xx,zz])
+
+    def numpy_test_function(self, value):
         from compas.rpc import Proxy
         np = Proxy('numpy')
         linalg = Proxy('numpy.linalg')
@@ -115,7 +120,7 @@ class Wall(object):
         print("running numpy test function")
 
         a = np.array([[1, 2], [3, 5]])
-        b = np.array([1, 2])
+        b = np.array([1, 2*value])
         x = linalg.solve(a, b)
 
         return x
