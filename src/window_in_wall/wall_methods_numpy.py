@@ -10,22 +10,22 @@ import numpy as np
 def apply_x_dir(i, j, val, Kx, x_size, z_size):
     rhsX = np.zeros(x_size*z_size)
     
-    rhsX = rhsX - Kx[n_from_ij(i,j, z_size),:] * val
-    Kx[n_from_ij(i,j, z_size),:] = 0
-    Kx[:,n_from_ij(i,j, z_size)] = 0
-    Kx[n_from_ij(i,j, z_size),n_from_ij(i,j, z_size)] = 1.0
-    rhsX[n_from_ij(i,j, z_size)] = val
+    rhsX = rhsX - Kx[n_from_ijs(i,j, z_size),:] * val
+    Kx[n_from_ijs(i,j, z_size),:] = 0
+    Kx[:,n_from_ijs(i,j, z_size)] = 0
+    Kx[n_from_ijs(i,j, z_size),n_from_ijs(i,j, z_size)] = 1.0
+    rhsX[n_from_ijs(i,j, z_size)] = val
     
     return rhsX
 
 def apply_z_dir(i, j, val, Kz, x_size, z_size):
     rhsZ = np.zeros(x_size*z_size)
 
-    rhsZ = rhsZ - Kz[n_from_ij(i,j, z_size),:] * val
-    Kz[n_from_ij(i,j, z_size),:] = 0
-    Kz[:,n_from_ij(i,j, z_size)] = 0
-    Kz[n_from_ij(i,j, z_size),n_from_ij(i,j, z_size)] = 1.0
-    rhsZ[n_from_ij(i,j, z_size)] = val
+    rhsZ = rhsZ - Kz[n_from_ijs(i,j, z_size),:] * val
+    Kz[n_from_ijs(i,j, z_size),:] = 0
+    Kz[:,n_from_ijs(i,j, z_size)] = 0
+    Kz[n_from_ijs(i,j, z_size),n_from_ijs(i,j, z_size)] = 1.0
+    rhsZ[n_from_ijs(i,j, z_size)] = val
 
     return rhsZ
 
@@ -78,5 +78,5 @@ def compute_displacement(mesh, gate_points, x_size, z_size):
 
     return (solX, solZ)
 
-def n_from_ij(i,j,size):
+def n_from_ijs(i,j,size):
     return (i*size+j)
