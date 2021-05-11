@@ -39,13 +39,24 @@
     (wiw) python -m compas_rhino.install -p ur_fabrication_control -v 7.0
 
 
-### 3. Cloning the Course Repository
+### 3. Cloning and installing the Course Repository
 
-Create a workspace directory:
+* Create a workspace directory: C:\Users\YOUR_USERNAME\workspace
+* Open Github Desktop, clone the [window_in_wall](https://github.com/augmentedfabricationlab/window_in_wall) repository into you workspace folder 
+* Install within your wiw env (in editable mode):
 
-C:\Users\YOUR_USERNAME\workspace
+###  
+    (wiw) pip install -e your_filepath_to_window_in_wall
 
-Then open Github Desktop and clone the [window_in_wall](https://github.com/augmentedfabricationlab/window_in_wall) repository into you workspace folder:
 
+* Change to repository directory in the Anaconda prompt and make the project accessible for Rhino:
+
+### 
+    (wiw) pip install -r requirements-dev.txt  
+    (wiw) invoke add-to-rhino
+
+### 4. Notes on RPC:
+
+Careful: RPC (Remote Procedure Call) for calling numpy functions from within Rhino, is using the CPython Interpreter of the latest installed environment, not defined specifically. If another interpreter should be used, this can be defined when creating the Proxy object.
 
 ### Credits
