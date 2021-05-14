@@ -59,7 +59,6 @@ class Wall(object):
     def gate_circular(self, gate_radius=1.0, gate_x=1.75):
         """calculate the gate points of a circular gate
         """
-        gate_radius = gate_radius * 1.0
 
         for vertex in self.mesh.vertices():
             # get x and z coordinates from vertex
@@ -70,19 +69,18 @@ class Wall(object):
             xx = gate_x-x_val
             zz = z_val
 
-            # calculate distance to the x location of the gate
+            # calculate region
             dist = math.sqrt((x_val-gate_x)*(x_val-gate_x)+z_val*z_val)
-            if abs(dist-gate_radius)<self.elsize:
+            if dist < gate_radius:
                 # store new vertex attribute with the distance to the gate center
                 self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
                 i = self.mesh.vertex_attribute(vertex, "i")
                 j = self.mesh.vertex_attribute(vertex, "j")
-                self.gate_points.append([i,j,-xx,zz])
+                self.gate_points.append([i,j,-xx*0.99,zz*0.99])
     
     def gate_persian(self, gate_radius=1.0, gate_x=1.75):
         """calculate the gate points of a persian gate
         """
-        gate_radius = gate_radius * 1.0
 
         for vertex in self.mesh.vertices():
             # get x and z coordinates from vertex
@@ -110,7 +108,7 @@ class Wall(object):
                 self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
                 i = self.mesh.vertex_attribute(vertex, "i")
                 j = self.mesh.vertex_attribute(vertex, "j")
-                self.gate_points.append([i,j,-xx,zz])
+                self.gate_points.append([i,j,-xx*0.99,zz*0.99])
 
     def numpy_test_function(self, value):
         from compas.rpc import Proxy
