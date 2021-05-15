@@ -23,7 +23,7 @@ def apply_z_dir(i, j, val, Kz, x_size, z_size, rhsZ):
     rhsZ[n_from_ijs(i,j, z_size)] = val
     return rhsZ
 
-def compute_displacement(mesh, gate_points, x_size, z_size, coeff_diffusion=1):
+def compute_displacement(gate_points, x_size, z_size, coeff_diffusion=1):
     """
 
     """

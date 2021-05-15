@@ -3,6 +3,7 @@ import compas
 
 from compas.datastructures import Mesh
 
+
 class Wall(object):
     """ Wall generator
 
@@ -31,7 +32,7 @@ class Wall(object):
                 x = i * self.elsize
                 y = 0
                 z = j * self.elsize
-                self.mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j)
+                self.mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j, x_disp=0, z_disp=0)
 
         # create faces
         for i in range(self.x_size - 1):
@@ -56,6 +57,39 @@ class Wall(object):
             # set y coordinate from vertex
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
     
+    def undulate_with_displ(self, amp=0.075, freq=2.0, phase=0.0):
+        """undulate the mesh with sin waves using the displacement values
+        """
+        for vertex in self.mesh.vertices():
+            
+            x_val = self.mesh.vertex_attribute(vertex, name='x') # get x coordinate from vertex
+            x_disp = self.mesh.vertex_attribute(vertex, name='x_disp') # get displacement value fomr vertex
+            x_new = x_val - x_disp #*0.99 # calc new x location
+
+            # calculate y value offset from x_new
+            y_val = self.sin_wave(amp, freq, phase, x_new)
+
+            # set y coordinate from vertex
+            self.mesh.vertex_attribute(vertex, name='y', value=y_val)
+
+    def displace_vertices(self):
+        """displace vertices with prior computed displacement vec from the gate points
+        (this method is used just for preview)
+        """
+
+        for vertex in self.mesh.vertices():
+            x_val = self.mesh.vertex_attribute(vertex, name='x')
+            z_val = self.mesh.vertex_attribute(vertex, name='z')
+
+            x_disp = self.mesh.vertex_attribute(vertex, name='x_disp')
+            z_disp = self.mesh.vertex_attribute(vertex, name='z_disp')
+
+            x_new = x_val - x_disp*0.99 #for preview only, otherwise mesh cannot be drawn
+            z_new = z_val - z_disp*0.99 
+
+            self.mesh.vertex_attribute(vertex, name='x', value=x_new)
+            self.mesh.vertex_attribute(vertex, name='z', value=z_new)
+
     def gate_circular(self, gate_radius=1.0, gate_x=1.75):
         """calculate the gate points of a circular gate
         """
@@ -76,7 +110,7 @@ class Wall(object):
                 self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
                 i = self.mesh.vertex_attribute(vertex, "i")
                 j = self.mesh.vertex_attribute(vertex, "j")
-                self.gate_points.append([i,j,-xx*0.99,zz*0.99])
+                self.gate_points.append([i,j,-xx,zz])
     
     def gate_persian(self, gate_radius=1.0, gate_x=1.75):
         """calculate the gate points of a persian gate
@@ -108,7 +142,7 @@ class Wall(object):
                 self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
                 i = self.mesh.vertex_attribute(vertex, "i")
                 j = self.mesh.vertex_attribute(vertex, "j")
-                self.gate_points.append([i,j,-xx*0.99,zz*0.99])
+                self.gate_points.append([i,j,-xx,zz])
 
     def numpy_test_function(self, value):
         from compas.rpc import Proxy
