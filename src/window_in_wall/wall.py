@@ -15,6 +15,8 @@ class Wall(object):
         """
         self.mesh = Mesh()
         self.gate_points = []
+        self.printTopol = Mesh ()
+        self.printFrames = []
 
 
     def create_quad_mesh_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
@@ -32,7 +34,8 @@ class Wall(object):
                 x = i * self.elsize
                 y = 0
                 z = j * self.elsize
-                self.mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j, x_disp=0, z_disp=0)
+                glob_id = i*self.z_size+j
+                self.mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j, glob_id=glob_id, x_disp=0, z_disp=0)
 
         # create faces
         for i in range(self.x_size - 1):
@@ -72,9 +75,11 @@ class Wall(object):
             z_val = self.mesh.vertex_attribute(vertex, name='z')
             x_disp = self.mesh.vertex_attribute(vertex, name='x_disp') # get displacement value fomr vertex
             x_new = x_val - x_disp #*0.99 # calc new x location
+            z_disp = self.mesh.vertex_attribute(vertex, name='z_disp') # get displacement value fomr vertex
+            z_new = z_val - z_disp #*0.99 # calc new x location
 
             # z coordinate of the point normalized by the height of the wall
-            rel_z=z_val/(self.z_size*self.elsize)
+            rel_z=z_new/(self.z_size*self.elsize)
             # calculate y value of the up and down part of the wall at this x
             up_y = self.sin_wave(up_amp, up_freq, up_phase, x_new)
             down_y = self.sin_wave(down_amp, down_freq, down_phase, x_new)
@@ -96,65 +101,65 @@ class Wall(object):
             x_disp = self.mesh.vertex_attribute(vertex, name='x_disp')
             z_disp = self.mesh.vertex_attribute(vertex, name='z_disp')
 
-            x_new = x_val - x_disp*0.99 #for preview only, otherwise mesh cannot be drawn
-            z_new = z_val - z_disp*0.99 
+            x_new = x_val - x_disp*0.999 #for preview only, otherwise mesh cannot be drawn
+            z_new = z_val - z_disp*0.999 
 
             self.mesh.vertex_attribute(vertex, name='x', value=x_new)
             self.mesh.vertex_attribute(vertex, name='z', value=z_new)
 
-    def gate_circular(self, gate_radius=1.0, gate_x=1.75):
+    def make_gate(self, gate_size, gate_x, gate_type="circular"):
         """calculate the gate points of a circular gate
-        """
-
+        """        
         for vertex in self.mesh.vertices():
             # get x and z coordinates from vertex
             x_val = self.mesh.vertex_attribute(vertex, name='x')
             z_val = self.mesh.vertex_attribute(vertex, name='z')
 
             # calculate distance
-            xx = gate_x-x_val
-            zz = z_val
+            gate_rel_x = gate_x-x_val
+            gate_rel_z = z_val
 
-            # calculate region
-            dist = math.sqrt((x_val-gate_x)*(x_val-gate_x)+z_val*z_val)
-            if dist < gate_radius:
+            in_gate_vertex = False
+
+            if gate_type=="circular":
+                if self.in_gate_circular(gate_size, gate_x,gate_rel_x,gate_rel_z):
+                    in_gate_vertex = True
+            if gate_type=="persian":
+                if self.in_gate_persian(gate_size, gate_x,gate_rel_x,gate_rel_z):
+                    in_gate_vertex = True
+
+            if in_gate_vertex:
                 # store new vertex attribute with the distance to the gate center
-                self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
-                i = self.mesh.vertex_attribute(vertex, "i")
-                j = self.mesh.vertex_attribute(vertex, "j")
-                self.gate_points.append([i,j,-xx,zz])
+                self.mesh.vertex_attribute(vertex,"x_disp", value=-gate_rel_x)
+                self.mesh.vertex_attribute(vertex,"z_disp", value=gate_rel_z)
+                self.mesh.vertex_attribute(vertex,"in_gate", value=True)
+                self.gate_points.append(vertex)
+
+    def in_gate_circular(self,gate_size, gate_x,gate_rel_x,gate_rel_z):
+
+        # calculate region
+        dist = math.sqrt(gate_rel_x*gate_rel_x+gate_rel_z*gate_rel_z)
+        if dist < gate_size:
+            return True
+        else:
+            return False    
     
-    def gate_persian(self, gate_radius=1.0, gate_x=1.75):
-        """calculate the gate points of a persian gate
-        """
+    def in_gate_persian(self,gate_size, gate_x,gate_rel_x,gate_rel_z):
 
-        for vertex in self.mesh.vertices():
-            # get x and z coordinates from vertex
-            x_val = self.mesh.vertex_attribute(vertex, name='x')
-            z_val = self.mesh.vertex_attribute(vertex, name='z')
+        # calculate regions
+        region1 = gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0)
+        equation1 = abs(gate_rel_x)-gate_size < self.elsize
 
-            # calcluate distance
-            xx = gate_x-x_val
-            if xx==0:
-                xx=0.0000001
-            zz = z_val
+        region2 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0) and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2))
+        equation2 = abs((gate_rel_x)**2+(gate_rel_z-gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0))**2)-gate_size*gate_size < self.elsize*self.elsize
+        
+        region3 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)) and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(7/2))
+        equation3 = abs((gate_rel_x+gate_rel_x*gate_size*math.sqrt(2)/(2*abs(gate_rel_x)))**2+(gate_rel_z-gate_size*(math.sqrt(2.5-math.sqrt(2.0))))**2)-4*gate_size*gate_size < self.elsize*self.elsize
 
-            # calculate regions
-            region1 = zz < gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0)
-            equation1 = abs(xx)-gate_radius < self.elsize
-
-            region2 = zz > gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0) and zz < gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2))
-            equation2 = abs((xx)**2+(zz-gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0))**2)-gate_radius*gate_radius < self.elsize*self.elsize
-            
-            region3 = zz > gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)) and zz < gate_radius*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(7/2))
-            equation3 = abs((xx+xx*gate_radius*math.sqrt(2)/(2*abs(xx)))**2+(zz-gate_radius*(math.sqrt(2.5-math.sqrt(2.0))))**2)-4*gate_radius*gate_radius < self.elsize*self.elsize
-
-            if (region1 and equation1) or (region2 and equation2) or (region3 and equation3):
-                # store new vertex attribute with the distance to the gate center
-                self.mesh.vertex_attribute(vertex, name='gate_point_value', value=[-xx,zz])
-                i = self.mesh.vertex_attribute(vertex, "i")
-                j = self.mesh.vertex_attribute(vertex, "j")
-                self.gate_points.append([i,j,-xx,zz])
+        if (region1 and equation1) or (region2 and equation2) or (region3 and equation3):
+            return True
+        else:
+            return False
 
     def numpy_test_function(self, value):
         from compas.rpc import Proxy

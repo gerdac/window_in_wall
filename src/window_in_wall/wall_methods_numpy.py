@@ -7,23 +7,23 @@ from math import fabs
 import compas
 import numpy as np
 
-def apply_x_dir(i, j, val, Kx, x_size, z_size, rhsX):
-    rhsX = rhsX - Kx[n_from_ijs(i,j, z_size),:] * val
-    Kx[n_from_ijs(i,j, z_size),:] = 0
-    Kx[:,n_from_ijs(i,j, z_size)] = 0
-    Kx[n_from_ijs(i,j, z_size),n_from_ijs(i,j, z_size)] = 1.0
-    rhsX[n_from_ijs(i,j, z_size)] = val
+def apply_x_dir(glob_id, x_disp, Kx, rhsX):
+    rhsX = rhsX - Kx[glob_id,:] * x_disp
+    Kx[glob_id,:] = 0
+    Kx[:,glob_id] = 0
+    Kx[glob_id,glob_id] = 1.0
+    rhsX[glob_id] = x_disp
     return rhsX
 
-def apply_z_dir(i, j, val, Kz, x_size, z_size, rhsZ):
-    rhsZ = rhsZ - Kz[n_from_ijs(i,j, z_size),:] * val
-    Kz[n_from_ijs(i,j, z_size),:] = 0
-    Kz[:,n_from_ijs(i,j, z_size)] = 0
-    Kz[n_from_ijs(i,j, z_size),n_from_ijs(i,j, z_size)] = 1.0
-    rhsZ[n_from_ijs(i,j, z_size)] = val
+def apply_z_dir(glob_id, z_disp, Kz, rhsZ):
+    rhsZ = rhsZ - Kz[glob_id,:] * z_disp
+    Kz[glob_id,:] = 0
+    Kz[:,glob_id] = 0
+    Kz[glob_id,glob_id] = 1.0
+    rhsZ[glob_id] = z_disp
     return rhsZ
 
-def compute_displacement(gate_points, x_size, z_size, coeff_diffusion=1):
+def compute_displacement(mesh, gate_points, x_size, z_size, coeff_diffusion=1):
     """
 
     """
@@ -69,9 +69,12 @@ def compute_displacement(gate_points, x_size, z_size, coeff_diffusion=1):
         if i/z_size > x_size-1:
             Kz[i,(i-z_size)] = Kz[i,(i-z_size)]-coeff_diffusion
 
-    for p in (gate_points):
-        rhsX = apply_x_dir(p[0], p[1], p[2], Kx, x_size, z_size, rhsX)
-        rhsZ = apply_z_dir(p[0], p[1], p[3], Kz, x_size, z_size, rhsZ)
+    for vertex in (gate_points):
+        glob_id = mesh.vertex_attribute(vertex, "glob_id")
+        x_disp = mesh.vertex_attribute(vertex, "x_disp")
+        z_disp = mesh.vertex_attribute(vertex, "z_disp")
+        rhsX = apply_x_dir(glob_id, x_disp, Kx, rhsX)
+        rhsZ = apply_z_dir(glob_id, z_disp, Kz, rhsX)
    
     solX = np.linalg.solve(Kx,rhsX)
     solZ = np.linalg.solve(Kz,rhsZ)
