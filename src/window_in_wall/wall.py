@@ -107,7 +107,7 @@ class Wall(object):
             self.mesh.vertex_attribute(vertex, name='x', value=x_new)
             self.mesh.vertex_attribute(vertex, name='z', value=z_new)
 
-    def make_gate(self, gate_size, gate_x, gate_type="circular"):
+    def make_gate(self, gate_size, gate_x, gate_type):
         """calculate the gate points of a circular gate
         """        
         for vertex in self.mesh.vertices():
@@ -119,13 +119,16 @@ class Wall(object):
             gate_rel_x = gate_x-x_val
             gate_rel_z = z_val
 
+            if gate_rel_x==0:
+                gate_rel_x=0.000000001
+
             in_gate_vertex = False
 
             if gate_type=="circular":
-                if self.in_gate_circular(gate_size, gate_x,gate_rel_x,gate_rel_z):
+                if self.in_gate_circular(gate_size, gate_rel_x,gate_rel_z):
                     in_gate_vertex = True
             if gate_type=="persian":
-                if self.in_gate_persian(gate_size, gate_x,gate_rel_x,gate_rel_z):
+                if self.in_gate_persian(gate_size, gate_rel_x,gate_rel_z):
                     in_gate_vertex = True
 
             if in_gate_vertex:
@@ -135,7 +138,7 @@ class Wall(object):
                 self.mesh.vertex_attribute(vertex,"in_gate", value=True)
                 self.gate_points.append(vertex)
 
-    def in_gate_circular(self,gate_size, gate_x,gate_rel_x,gate_rel_z):
+    def in_gate_circular(self,gate_size, gate_rel_x,gate_rel_z):
 
         # calculate region
         dist = math.sqrt(gate_rel_x*gate_rel_x+gate_rel_z*gate_rel_z)
@@ -144,7 +147,7 @@ class Wall(object):
         else:
             return False    
     
-    def in_gate_persian(self,gate_size, gate_x,gate_rel_x,gate_rel_z):
+    def in_gate_persian(self,gate_size, gate_rel_x,gate_rel_z):
 
         # calculate regions
         region1 = gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0)
@@ -153,7 +156,7 @@ class Wall(object):
         region2 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0) and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2))
         equation2 = abs((gate_rel_x)**2+(gate_rel_z-gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0))**2)-gate_size*gate_size < self.elsize*self.elsize
         
-        region3 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)) and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(7/2))
+        region3 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)) #and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(7/2))
         equation3 = abs((gate_rel_x+gate_rel_x*gate_size*math.sqrt(2)/(2*abs(gate_rel_x)))**2+(gate_rel_z-gate_size*(math.sqrt(2.5-math.sqrt(2.0))))**2)-4*gate_size*gate_size < self.elsize*self.elsize
 
         if (region1 and equation1) or (region2 and equation2) or (region3 and equation3):
