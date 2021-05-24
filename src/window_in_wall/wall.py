@@ -101,14 +101,14 @@ class Wall(object):
             x_disp = self.mesh.vertex_attribute(vertex, name='x_disp')
             z_disp = self.mesh.vertex_attribute(vertex, name='z_disp')
 
-            x_new = x_val - x_disp*0.999 #for preview only, otherwise mesh cannot be drawn
-            z_new = z_val - z_disp*0.999 
+            x_new = x_val - x_disp*0.99009 #for preview only, otherwise mesh cannot be drawn
+            z_new = z_val - z_disp*0.99009 
 
             self.mesh.vertex_attribute(vertex, name='x', value=x_new)
             self.mesh.vertex_attribute(vertex, name='z', value=z_new)
 
     def make_gate(self, gate_size, gate_x, gate_type):
-        """calculate the gate points of a circular gate
+        """calculate the gate points, and their relative position to the gate center on floor
         """        
         for vertex in self.mesh.vertices():
             # get x and z coordinates from vertex
@@ -119,11 +119,15 @@ class Wall(object):
             gate_rel_x = gate_x-x_val
             gate_rel_z = z_val
 
+            #in order to avoid division by zero. should be cleaned up ASAP
             if gate_rel_x==0:
                 gate_rel_x=0.000000001
 
+            #this boolean will be set to True if vertex lies inside the gate 
             in_gate_vertex = False
 
+            #for each gate tpye, the a corresponding function is called to check
+            # to check if vertex lies inside the gate
             if gate_type=="circular":
                 if self.in_gate_circular(gate_size, gate_rel_x,gate_rel_z):
                     in_gate_vertex = True
@@ -135,12 +139,16 @@ class Wall(object):
                 # store new vertex attribute with the distance to the gate center
                 self.mesh.vertex_attribute(vertex,"x_disp", value=-gate_rel_x)
                 self.mesh.vertex_attribute(vertex,"z_disp", value=gate_rel_z)
+                #in_gate flag indicates that this vertex lies in the gate
                 self.mesh.vertex_attribute(vertex,"in_gate", value=True)
                 self.gate_points.append(vertex)
 
     def in_gate_circular(self,gate_size, gate_rel_x,gate_rel_z):
+        """returns True if the relative coordintes (gate_rel_x,gate_rel_z) lie in
+        a circular gate of size gate_size. otherwise false
+        """   
 
-        # calculate region
+        # calculate region (distance to gate center)
         dist = math.sqrt(gate_rel_x*gate_rel_x+gate_rel_z*gate_rel_z)
         if dist < gate_size:
             return True
@@ -148,17 +156,25 @@ class Wall(object):
             return False    
     
     def in_gate_persian(self,gate_size, gate_rel_x,gate_rel_z):
+        """returns Tre if the relative coordintes (gate_rel_x,gate_rel_z) lie in
+        a "persian" gate of size gate_size. otherwise false
+        """   
 
         # calculate regions
+        # region 1 is the lower part (rectangular)
         region1 = gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0)
+        # equation 1 is true if the x distance to gate center is smaller than gate width / 2
         equation1 = abs(gate_rel_x)-gate_size < self.elsize
 
+        #region 2 is the midd section with smaller radii
         region2 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0) and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2))
         equation2 = abs((gate_rel_x)**2+(gate_rel_z-gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)/2.0))**2)-gate_size*gate_size < self.elsize*self.elsize
         
+        #region 3 is the top section with larger radii and the pointy peak
         region3 = gate_rel_z > gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(2)) #and gate_rel_z < gate_size*(math.sqrt(2.5-math.sqrt(2.0))+math.sqrt(7/2))
         equation3 = abs((gate_rel_x+gate_rel_x*gate_size*math.sqrt(2)/(2*abs(gate_rel_x)))**2+(gate_rel_z-gate_size*(math.sqrt(2.5-math.sqrt(2.0))))**2)-4*gate_size*gate_size < self.elsize*self.elsize
 
+        #checking if the point (coordinate) in question lies in  any of the regions
         if (region1 and equation1) or (region2 and equation2) or (region3 and equation3):
             return True
         else:
