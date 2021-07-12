@@ -25,6 +25,8 @@ class Wall(object):
         
         self.elsize = elsize
 
+        self.width = width
+        self.height = height
         self.x_size = int(width / elsize) + 1
         self.z_size = int(height / elsize) + 1
 
@@ -143,7 +145,7 @@ class Wall(object):
                 self.mesh.vertex_attribute(vertex,"in_gate", value=True)
                 self.gate_points.append(vertex)
 
-    def in_gate_circular(self,gate_size, gate_rel_x,gate_rel_z):
+    def in_gate_circular(self, gate_size, gate_rel_x, gate_rel_z):
         """returns True if the relative coordintes (gate_rel_x,gate_rel_z) lie in
         a circular gate of size gate_size. otherwise false
         """   
@@ -155,7 +157,7 @@ class Wall(object):
         else:
             return False    
     
-    def in_gate_persian(self,gate_size, gate_rel_x,gate_rel_z):
+    def in_gate_persian(self, gate_size, gate_rel_x, gate_rel_z):
         """returns Tre if the relative coordintes (gate_rel_x,gate_rel_z) lie in
         a "persian" gate of size gate_size. otherwise false
         """   
