@@ -25,10 +25,11 @@ class Wall(object):
         
         self.elsize = elsize
 
-        self.width = width
-        self.height = height
         self.x_size = int(width / elsize) + 1
         self.z_size = int(height / elsize) + 1
+
+        self.width = elsize*(self.x_size-1)
+        self.height = elsize*(self.z_size-1)
 
         # create vertices
         for i in range(self.x_size):
