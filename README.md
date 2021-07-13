@@ -47,13 +47,7 @@
 
 ###  
     (wiw) pip install -e your_filepath_to_window_in_wall
-
-
-* Change to repository directory in the Anaconda prompt and make the project accessible for Rhino:
-
-### 
-    (wiw) pip install -r requirements-dev.txt  
-    (wiw) invoke add-to-rhino
+    (wiw) python -m compas_rhino.install -p window_in_wall -v 7.0
 
 ### 4. Notes on RPC:
 
