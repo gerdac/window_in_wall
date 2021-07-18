@@ -14,10 +14,12 @@ class Wall(object):
 
         """
         self.mesh = Mesh()
+        self.mesh_offset = Mesh()
         self.gate_points = []
-        self.printTopol = Mesh ()
-        self.printFrames = []
 
+    def create_quad_meshes_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
+        self.mesh = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
+        self.mesh_offset = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
 
     def create_quad_mesh_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
         """create a regular quad mesh from height and width and edge length in the xz-plane
@@ -31,6 +33,7 @@ class Wall(object):
         self.width = elsize*(self.x_size-1)
         self.height = elsize*(self.z_size-1)
 
+        mesh = Mesh()
         # create vertices
         for i in range(self.x_size):
             for j in range(self.z_size):
@@ -38,7 +41,7 @@ class Wall(object):
                 y = 0
                 z = j * self.elsize
                 glob_id = i*self.z_size+j
-                self.mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j, glob_id=glob_id, x_disp=0, z_disp=0)
+                mesh.add_vertex(x = x, y = 0, z = z, i=i, j=j, glob_id=glob_id, x_disp=0, z_disp=0)
 
         # create faces
         for i in range(self.x_size - 1):
@@ -47,7 +50,9 @@ class Wall(object):
                 b = a + self.z_size
                 c = b + 1
                 d = a + 1
-                self.mesh.add_face([a, b, c, d])
+                mesh.add_face([a, b, c, d])
+        
+        return mesh
     
     def sin_wave(self, amp, freq, phase, value):
         return(amp * math.sin(2.0 * math.pi * freq * value + phase))
@@ -79,18 +84,27 @@ class Wall(object):
             x_disp = self.mesh.vertex_attribute(vertex, name='x_disp') # get displacement value fomr vertex
             x_new = x_val - x_disp #*0.99 # calc new x location
             z_disp = self.mesh.vertex_attribute(vertex, name='z_disp') # get displacement value fomr vertex
+            #z_disp = 0 #test
             z_new = z_val - z_disp #*0.99 # calc new x location
 
             # z coordinate of the point normalized by the height of the wall
             rel_z=z_new/(self.z_size*self.elsize)
+
             # calculate y value of the up and down part of the wall at this x
             up_y = self.sin_wave(up_amp, up_freq, up_phase, x_new)
             down_y = self.sin_wave(down_amp, down_freq, down_phase, x_new)
+
             # specify a y value as a linear blending of the top and the botom of the wall
             y_val = rel_z*up_y + (1.0-rel_z)*down_y
 
+            # shift the y value in relation to the max amplitude:
+            layer_amp = rel_z*up_amp + (1.0-rel_z)*down_amp
+            shift_val = down_amp - layer_amp
+            y_val = y_val + shift_val
+
             # set y coordinate from vertex
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
+            self.mesh_offset.vertex_attribute(vertex, name='y', value=-y_val+2*down_amp)
 
     def displace_vertices(self):
         """displace vertices with prior computed displacement vec from the gate points
@@ -132,10 +146,10 @@ class Wall(object):
             #for each gate tpye, the a corresponding function is called to check
             # to check if vertex lies inside the gate
             if gate_type=="circular":
-                if self.in_gate_circular(gate_size, gate_rel_x,gate_rel_z):
+                if self.in_gate_circular(gate_size, gate_rel_x, gate_rel_z):
                     in_gate_vertex = True
             if gate_type=="persian":
-                if self.in_gate_persian(gate_size, gate_rel_x,gate_rel_z):
+                if self.in_gate_persian(gate_size, gate_rel_x, gate_rel_z):
                     in_gate_vertex = True
 
             if in_gate_vertex:
