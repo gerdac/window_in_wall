@@ -19,6 +19,9 @@ class Wall(object):
 
     def create_quad_meshes_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
         self.mesh = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
+    
+    def create_quad_meshes_from_dimensions_dl(self, width=3.5, height=3.2, elsize=0.025):
+        self.mesh = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
         self.mesh_offset = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
 
     def create_quad_mesh_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
@@ -98,13 +101,15 @@ class Wall(object):
             y_val = rel_z*up_y + (1.0-rel_z)*down_y
 
             # shift the y value in relation to the max amplitude:
-            layer_amp = rel_z*up_amp + (1.0-rel_z)*down_amp
-            shift_val = down_amp - layer_amp
-            y_val = y_val + shift_val
+            if len(list(self.mesh_offset.vertices())):
+                layer_amp = rel_z*up_amp + (1.0-rel_z)*down_amp
+                shift_val = down_amp - layer_amp
+                y_val = y_val + shift_val
+                self.mesh_offset.vertex_attribute(vertex, name='y', value=-y_val+2*down_amp)
 
             # set y coordinate from vertex
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
-            self.mesh_offset.vertex_attribute(vertex, name='y', value=-y_val+2*down_amp)
+                
 
     def displace_vertices(self):
         """displace vertices with prior computed displacement vec from the gate points
