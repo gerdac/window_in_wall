@@ -18,11 +18,11 @@ class Wall(object):
         self.gate_points = []
 
     def create_quad_meshes_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
-        self.mesh = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
+        self.mesh = self.create_quad_mesh_from_dimensions(width, height, elsize)
     
     def create_quad_meshes_from_dimensions_dl(self, width=3.5, height=3.2, elsize=0.025):
-        self.mesh = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
-        self.mesh_offset = self.create_quad_mesh_from_dimensions(width=3.5, height=3.2, elsize=0.025)
+        self.mesh = self.create_quad_mesh_from_dimensions(width, height, elsize)
+        self.mesh_offset = self.create_quad_mesh_from_dimensions(width, height, elsize)
 
     def create_quad_mesh_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
         """create a regular quad mesh from height and width and edge length in the xz-plane
