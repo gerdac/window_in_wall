@@ -15,6 +15,7 @@ class Wall(object):
         """
         self.mesh = Mesh()
         self.mesh_offset = Mesh()
+        self.mesh_displaced = Mesh()
         self.gate_points = []
 
     def create_quad_meshes_from_dimensions(self, width=3.5, height=3.2, elsize=0.025):
@@ -111,12 +112,14 @@ class Wall(object):
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
                 
 
-    def displace_vertices(self):
+    def create_mesh_displaced(self):
         """displace vertices with prior computed displacement vec from the gate points
         (this method is used just for preview)
         """
 
-        for vertex in self.mesh.vertices():
+        self.mesh_displaced = self.mesh.copy()
+
+        for vertex in self.mesh_displaced.vertices():
             x_val = self.mesh.vertex_attribute(vertex, name='x')
             z_val = self.mesh.vertex_attribute(vertex, name='z')
 
@@ -126,8 +129,8 @@ class Wall(object):
             x_new = x_val - x_disp*0.99009 #for preview only, otherwise mesh cannot be drawn
             z_new = z_val - z_disp*0.99009 
 
-            self.mesh.vertex_attribute(vertex, name='x', value=x_new)
-            self.mesh.vertex_attribute(vertex, name='z', value=z_new)
+            self.mesh_displaced.vertex_attribute(vertex, name='x', value=x_new)
+            self.mesh_displaced.vertex_attribute(vertex, name='z', value=z_new)
 
     def make_gate(self, gate_size, gate_x, gate_type):
         """calculate the gate points, and their relative position to the gate center on floor
