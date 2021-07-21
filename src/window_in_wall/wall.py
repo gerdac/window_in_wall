@@ -2,6 +2,7 @@ import math
 import compas
 
 from compas.datastructures import Mesh
+import itertools
 
 
 class Wall(object):
@@ -38,6 +39,7 @@ class Wall(object):
         self.height = elsize*(self.z_size-1)
 
         mesh = Mesh()
+
         # create vertices
         for i in range(self.x_size):
             for j in range(self.z_size):
@@ -78,21 +80,16 @@ class Wall(object):
             # set y coordinate from vertex
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
     
-    def undulate_with_displ(self, up_amp=0.075, up_freq=2.0, up_phase=0.0,down_amp=0.075, down_freq=2.0, down_phase=0.0):
+    def undulate_with_displ(self, up_amp=0.075, up_freq=2.0, up_phase=0.0, down_amp=0.075, down_freq=2.0, down_phase=0.0):
         """undulate the mesh with sin waves using the displacement values
         """
         for vertex in self.mesh.vertices():
-            
-            x_val = self.mesh.vertex_attribute(vertex, name='x') # get x coordinate from vertex
-            z_val = self.mesh.vertex_attribute(vertex, name='z')
-            x_disp = self.mesh.vertex_attribute(vertex, name='x_disp') # get displacement value fomr vertex
-            x_new = x_val - x_disp #*0.99 # calc new x location
-            z_disp = self.mesh.vertex_attribute(vertex, name='z_disp') # get displacement value fomr vertex
-            #z_disp = 0 #test
-            z_new = z_val - z_disp #*0.99 # calc new x location
+            vrt_attrs = self.mesh.vertex_attributes(vertex)
+            x_new = vrt_attrs["x"] - vrt_attrs["x_disp"] #*0.99 # calc new x location
+            z_new = vrt_attrs["z"] - vrt_attrs["z_disp"] #*0.99 # calc new x location
 
             # z coordinate of the point normalized by the height of the wall
-            rel_z=z_new/(self.z_size*self.elsize)
+            rel_z = z_new/(self.z_size*self.elsize)
 
             # calculate y value of the up and down part of the wall at this x
             up_y = self.sin_wave(up_amp, up_freq, up_phase, x_new)
@@ -180,6 +177,17 @@ class Wall(object):
         else:
             return False    
     
+    def in_gate_triangular(self, gate_size, gate_rel_x, gate_rel_z):
+        """returns True if the relative coordintes (gate_rel_x,gate_rel_z) lie in
+        a triangular gate of size gate_size. otherwise false
+        """   
+
+        # calculate region (distance to gate center)
+        if (gate_rel_z + abs(gate_rel_x)) < gate_size:
+            return True
+        else:
+            return False    
+
     def in_gate_persian(self, gate_size, gate_rel_x, gate_rel_z):
         """returns Tre if the relative coordintes (gate_rel_x,gate_rel_z) lie in
         a "persian" gate of size gate_size. otherwise false
