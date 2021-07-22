@@ -107,6 +107,55 @@ class Wall(object):
 
             # set y coordinate from vertex
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
+
+    def undulate_with_displ_double(self, up_amp=0.075, up_freq=2.0, up_phase=0.0, down_amp=0.075, down_freq=2.0, down_phase=0.0, gate_x=1.0,thick=0.2,offset=0.0,fade_rad=0.5,fade_z=0):
+        """undulate the mesh with sin waves using the displacement values
+        """
+        down_freq=int(down_freq*gate_x)/gate_x
+        up_freq=down_freq
+        down_phase=0
+        up_phase=0
+
+
+
+        for vertex in self.mesh.vertices():
+            vrt_attrs = self.mesh.vertex_attributes(vertex)
+            orig_x = vrt_attrs["x"]
+            orig_z = vrt_attrs["z"]
+            x_new = vrt_attrs["x"] - vrt_attrs["x_disp"] #*0.99 # calc new x location
+            z_new = vrt_attrs["z"] - vrt_attrs["z_disp"] #*0.99 # calc new x location
+
+            fader=1.0
+            dist_fade=math.sqrt((gate_x-x_new)*(gate_x-x_new)+(fade_z-z_new)*(fade_z-z_new))
+            if dist_fade<fade_rad:
+                fader=0.5+0.5*(1.0-math.cos((math.pi*dist_fade/fade_rad)))/2.0
+
+            # z coordinate of the point normalized by the height of the wall
+            rel_z = z_new/(self.z_size*self.elsize)
+
+            # calculate y value of the up and down part of the wall at this x
+            help1=1+thick*self.sin_wave(1, down_freq, down_phase, x_new)
+            help2=1-thick*self.sin_wave(1, down_freq, down_phase, x_new)
+
+            up_y = help1* self.sin_wave(up_amp, up_freq, up_phase, x_new)
+            down_y = help1 * self.sin_wave(down_amp, down_freq, down_phase, x_new)
+
+            # specify a y value as a linear blending of the top and the botom of the wall
+            y_val = rel_z*up_y + (1.0-rel_z)*down_y
+
+            # shift the y value in relation to the max amplitude:
+            if len(list(self.mesh_offset.vertices())):
+                #layer_amp = rel_z*up_amp + (1.0-rel_z)*down_amp
+                #shift_val = down_amp - layer_amp
+                #y_val = y_val + shift_val
+                #self.mesh_offset.vertex_attribute(vertex, name='y', value=-y_val+2*down_amp)
+                up_y_2 = help2* self.sin_wave(up_amp, up_freq, up_phase, x_new)
+                down_y_2 = help2 * self.sin_wave(down_amp, down_freq, down_phase, x_new)
+                y_val_2 = rel_z*up_y_2 + (1.0-rel_z)*down_y_2
+                self.mesh_offset.vertex_attribute(vertex, name='y', value=fader*y_val_2-offset)
+
+            # set y coordinate from vertex
+            self.mesh.vertex_attribute(vertex, name='y', value=fader*y_val)
                 
 
     def create_mesh_displaced(self):
