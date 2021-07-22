@@ -60,11 +60,11 @@ class Wall(object):
         
         return mesh
     
-    def sin_wave(self, amp, freq, phase, value):
-        return(amp * math.sin(2.0 * math.pi * freq * value + phase))
+    def cos_wave(self, amp, freq, phase, value):
+        return(amp * math.cos(2.0 * math.pi * freq * value + phase))
 
     def undulate(self, up_amp=0.075, up_freq=2.0, up_phase=0.0,down_amp=0.075, down_freq=2.0, down_phase=0.0):
-        """undulate the mesh with sin waves
+        """undulate the mesh with cos waves
         """
         for vertex in self.mesh.vertices():
             # get x coordinate from vertex
@@ -73,15 +73,15 @@ class Wall(object):
             # z coordinate of the point normalized by the height of the wall
             rel_z=z_val/(self.z_size*self.elsize)
             # calculate y value of the up and down part of the wall at this x
-            up_y = self.sin_wave(up_amp, up_freq, up_phase, x_val)
-            down_y = self.sin_wave(down_amp, down_freq, down_phase, x_val)
+            up_y = self.cos_wave(up_amp, up_freq, up_phase, x_val)
+            down_y = self.cos_wave(down_amp, down_freq, down_phase, x_val)
             # specify a y value as a linear blending of the top and the botom of the wall
             y_val = rel_z*up_y + (1.0-rel_z)*down_y
             # set y coordinate from vertex
             self.mesh.vertex_attribute(vertex, name='y', value=y_val)
     
     def undulate_with_displ(self, up_amp=0.075, up_freq=2.0, up_phase=0.0, down_amp=0.075, down_freq=2.0, down_phase=0.0):
-        """undulate the mesh with sin waves using the displacement values
+        """undulate the mesh with cos waves using the displacement values
         """
         for vertex in self.mesh.vertices():
             vrt_attrs = self.mesh.vertex_attributes(vertex)
@@ -92,8 +92,8 @@ class Wall(object):
             rel_z = z_new/(self.z_size*self.elsize)
 
             # calculate y value of the up and down part of the wall at this x
-            up_y = self.sin_wave(up_amp, up_freq, up_phase, x_new)
-            down_y = self.sin_wave(down_amp, down_freq, down_phase, x_new)
+            up_y = self.cos_wave(up_amp, up_freq, up_phase, x_new)
+            down_y = self.cos_wave(down_amp, down_freq, down_phase, x_new)
 
             # specify a y value as a linear blending of the top and the botom of the wall
             y_val = rel_z*up_y + (1.0-rel_z)*down_y
