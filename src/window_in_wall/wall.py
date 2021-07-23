@@ -237,6 +237,15 @@ class Wall(object):
         else:
             return False    
 
+    def in_gate_catenary(self, gate_size, gate_rel_x, gate_rel_z, cat_a):
+        """returns True if the relative coordintes (gate_rel_x,gate_rel_z) lie in
+        a triangular gate of size gate_size. otherwise false
+        """   
+        if abs(gate_rel_x) < gate_size and gate_rel_z < (gate_size-cat_a*math.cosh(gate_rel_x/cat_a)+cat_a):
+            return True
+        else:
+            return False
+
     def in_gate_persian(self, gate_size, gate_rel_x, gate_rel_z):
         """returns Tre if the relative coordintes (gate_rel_x,gate_rel_z) lie in
         a "persian" gate of size gate_size. otherwise false
